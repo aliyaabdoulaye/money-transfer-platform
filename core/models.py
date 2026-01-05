@@ -4,6 +4,7 @@ Modèles du core de l'application
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
+from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ class VirtualAccount(models.Model):
     balance = models.DecimalField(
         max_digits=12,
         decimal_places=2,
-        default=0.00,
+        default=Decimal('0.00'),
         verbose_name="Solde",
         help_text="Solde actuel du compte virtuel"
     )
