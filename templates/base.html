@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MoneyTransfer Platform{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Messages Flash -->
+    {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+        {% for message in messages %}
+        <div class="fade-in max-w-md px-6 py-4 rounded-lg shadow-lg {% if message.tags == 'error' %}bg-red-500{% elif message.tags == 'success' %}bg-green-500{% elif message.tags == 'warning' %}bg-yellow-500{% else %}bg-blue-500{% endif %} text-white">
+            <div class="flex items-center justify-between">
+                <span>{{ message }}</span>
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                    ✕
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <a href="{% if user.is_authenticated %}{% url 'dashboard:user_dashboard' %}{% else %}{% url 'authentication:login' %}{% endif %}" class="text-2xl font-bold text-blue-600">
+                    💰 MoneyTransfer
+                </a>
+                
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <span class="text-gray-600">Bonjour, <strong>{{ user.username }}</strong></span>
+                        {% if user.is_staff %}
+                        <a href="{% url 'dashboard:admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Dashboard Admin</a>
+                        {% else %}
+                        <a href="{% url 'dashboard:user_dashboard' %}" class="text-blue-600 hover:text-blue-800">Mon Compte</a>
+                        {% endif %}
+                        <a href="{% url 'authentication:logout' %}" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
+                            Déconnexion
+                        </a>
+                    {% else %}
+                        <a href="{% url 'authentication:login' %}" class="text-blue-600 hover:text-blue-800">Connexion</a>
+                        <a href="{% url 'authentication:signup' %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            Inscription
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2026 MoneyTransfer Platform - Projet L3 IFNTI Sokodé</p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-hide messages after 5 seconds
+        setTimeout(() => {
+            const messages = document.querySelectorAll('.fade-in');
+            messages.forEach(msg => {
+                msg.style.transition = 'opacity 0.5s';
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

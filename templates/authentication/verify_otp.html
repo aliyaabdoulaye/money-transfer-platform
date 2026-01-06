@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Vérification OTP - MoneyTransfer{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <div class="text-center mb-6">
+            <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800">Vérifiez votre email</h2>
+            <p class="text-gray-600 mt-2">Nous avons envoyé un code à 6 chiffres à votre adresse email</p>
+        </div>
+        
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- OTP Code -->
+            <div>
+                <label for="{{ form.otp_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 text-center">
+                    Code de vérification
+                </label>
+                {{ form.otp_code }}
+                {% if form.otp_code.errors %}
+                <p class="mt-2 text-sm text-red-600 text-center">{{ form.otp_code.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-xs text-gray-500 text-center">Le code expire dans 2 minutes</p>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">
+                Vérifier le code
+            </button>
+        </form>
+        
+        <!-- Resend OTP -->
+        <div class="mt-6 text-center">
+            <p class="text-gray-600 mb-2">Vous n'avez pas reçu le code ?</p>
+            <form method="post" action="{% url 'authentication:resend_otp' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-blue-600 hover:text-blue-800 font-semibold">
+                    Renvoyer le code
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
