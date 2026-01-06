@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Historique - MoneyTransfer{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Historique des transactions</h1>
+                <p class="text-gray-600 mt-2">Consultez toutes vos transactions récentes</p>
+            </div>
+            <a href="{% url 'dashboard:user_dashboard' %}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- Transactions -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        {% if transactions %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">De / Vers</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for transaction in transactions %}
+                    <tr class="hover:bg-gray-50">
+                        <!-- Type -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                {% if transaction.transaction_type == 'deposit' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Dépôt
+                                </span>
+                                {% elif transaction.transaction_type == 'transfer' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    Transfert
+                                </span>
+                                {% elif transaction.transaction_type == 'withdrawal' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Retrait
+                                </span>
+                                {% elif transaction.transaction_type == 'fee' %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Frais
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- Montant -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if transaction.sender_account == user.virtual_account %}
+                            <span class="text-red-600 font-semibold">- {{ transaction.amount }} FCFA</span>
+                            {% else %}
+                            <span class="text-green-600 font-semibold">+ {{ transaction.amount }} FCFA</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- De / Vers -->
+                        <td class="px-6 py-4">
+                            {% if transaction.transaction_type == 'deposit' %}
+                            <span class="text-gray-600 text-sm">Crédit sur compte</span>
+                            {% elif transaction.transaction_type == 'transfer' %}
+                                {% if transaction.sender_account == user.virtual_account %}
+                                <span class="text-gray-600 text-sm">Vers: {{ transaction.receiver_account.user.username }}</span>
+                                {% else %}
+                                <span class="text-gray-600 text-sm">De: {{ transaction.sender_account.user.username }}</span>
+                                {% endif %}
+                            {% elif transaction.transaction_type == 'withdrawal' %}
+                            <span class="text-gray-600 text-sm">Retrait</span>
+                            {% elif transaction.transaction_type == 'fee' %}
+                            <span class="text-gray-600 text-sm">Commission plateforme</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Date -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ transaction.created_at|date:"d/m/Y H:i" }}
+                        </td>
+                        
+                        <!-- Référence -->
+                        <td class="px-6 py-4 whitespace-nowrap text-xs text-gray-400 font-mono">
+                            {{ transaction.reference }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="text-gray-500 text-lg">Aucune transaction pour le moment</p>
+            <a href="{% url 'dashboard:user_dashboard' %}" class="mt-4 inline-block text-blue-600 hover:text-blue-800">
+                Retour au dashboard
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

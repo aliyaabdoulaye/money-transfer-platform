@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Retrait - MoneyTransfer{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+        <a href="{% url 'dashboard:user_dashboard' %}" class="text-blue-600 hover:text-blue-800">← Retour au dashboard</a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800">Retrait d'argent</h2>
+            <p class="text-gray-600 mt-2">Retirez de l'argent depuis votre compte virtuel</p>
+        </div>
+
+        <!-- Solde actuel -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p class="text-sm text-blue-600 font-semibold">Solde disponible</p>
+            <p class="text-2xl font-bold text-blue-800">{{ user.virtual_account.balance }} FCFA</p>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Montant -->
+            <div>
+                <label for="{{ form.amount.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.amount.label }}
+                </label>
+                {{ form.amount }}
+                {% if form.amount.help_text %}
+                <p class="mt-1 text-xs text-gray-500">{{ form.amount.help_text }}</p>
+                {% endif %}
+                {% if form.amount.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.amount.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.description.label }}
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Info frais -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-yellow-800">Frais de retrait</p>
+                        <p class="text-sm text-yellow-700 mt-1">Des frais de 2% seront prélevés sur le montant du retrait.</p>
+                        <div class="mt-3 text-sm">
+                            <p class="text-yellow-800"><strong>Exemple :</strong> Pour un retrait de 10 000 FCFA :</p>
+                            <ul class="list-disc list-inside mt-1 text-yellow-700 space-y-1">
+                                <li>Montant retiré : 9 800 FCFA</li>
+                                <li>Frais de commission : 200 FCFA</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Info OTP -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-blue-800">Sécurité</p>
+                        <p class="text-sm text-blue-700 mt-1">Un code de vérification (OTP) sera envoyé à votre email pour confirmer le retrait.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Boutons -->
+            <div class="flex space-x-4">
+                <a href="{% url 'dashboard:user_dashboard' %}" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
+                    Annuler
+                </a>
+                <button type="submit" class="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition duration-200 font-semibold">
+                    Continuer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

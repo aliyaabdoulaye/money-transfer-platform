@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Dépôt - MoneyTransfer{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+        <a href="{% url 'dashboard:user_dashboard' %}" class="text-blue-600 hover:text-blue-800">← Retour au dashboard</a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800">Dépôt d'argent</h2>
+            <p class="text-gray-600 mt-2">Ajoutez de l'argent sur votre compte virtuel</p>
+        </div>
+
+        <!-- Solde actuel -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p class="text-sm text-blue-600 font-semibold">Solde actuel</p>
+            <p class="text-2xl font-bold text-blue-800">{{ user.virtual_account.balance }} FCFA</p>
+        </div>
+
+        <!-- Formulaire -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Montant -->
+            <div>
+                <label for="{{ form.amount.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.amount.label }}
+                </label>
+                {{ form.amount }}
+                {% if form.amount.help_text %}
+                <p class="mt-1 text-xs text-gray-500">{{ form.amount.help_text }}</p>
+                {% endif %}
+                {% if form.amount.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.amount.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ form.description.label }}
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                {% endif %}
+            </div>
+            
+            <!-- Info -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-gray-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700">Information</p>
+                        <p class="text-sm text-gray-600 mt-1">Le montant sera immédiatement crédité sur votre compte virtuel.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Boutons -->
+            <div class="flex space-x-4">
+                <a href="{% url 'dashboard:user_dashboard' %}" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
+                    Annuler
+                </a>
+                <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition duration-200 font-semibold">
+                    Effectuer le dépôt
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

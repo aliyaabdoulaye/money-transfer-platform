@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Vérification Retrait - MoneyTransfer{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800">Vérifiez votre retrait</h2>
+            <p class="text-gray-600 mt-2">Un code de sécurité a été envoyé à votre email</p>
+        </div>
+
+        <!-- Récapitulatif du retrait -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <h3 class="text-sm font-semibold text-red-800 mb-3">Récapitulatif du retrait</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-red-600">Montant demandé :</span>
+                    <span class="font-bold text-red-800">{{ withdrawal_data.amount }} FCFA</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-red-600">Frais (2%) :</span>
+                    <span class="font-bold text-red-800">{{ withdrawal_data.fee_amount }} FCFA</span>
+                </div>
+                <hr class="border-red-200">
+                <div class="flex justify-between">
+                    <span class="text-red-600 font-semibold">Montant à retirer :</span>
+                    <span class="font-bold text-red-900 text-lg">{{ withdrawal_data.withdrawal_amount }} FCFA</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulaire OTP -->
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div>
+                <label for="{{ form.otp_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2 text-center">
+                    Code de vérification
+                </label>
+                {{ form.otp_code }}
+                {% if form.otp_code.errors %}
+                <p class="mt-2 text-sm text-red-600 text-center">{{ form.otp_code.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-xs text-gray-500 text-center">Le code expire dans 3 minutes</p>
+            </div>
+            
+            <!-- Boutons -->
+            <div class="space-y-3">
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition duration-200 font-semibold">
+                    Confirmer le retrait
+                </button>
+                <a href="{% url 'transactions:withdrawal_request' %}" class="block w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition duration-200 font-semibold text-center">
+                    Annuler
+                </a>
+            </div>
+        </form>
+        
+        <!-- Resend OTP -->
+        <div class="mt-6 text-center">
+            <p class="text-gray-600 mb-2">Vous n'avez pas reçu le code ?</p>
+            <form method="post" action="{% url 'transactions:resend_withdrawal_otp' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-red-600 hover:text-red-800 font-semibold">
+                    Renvoyer le code
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
