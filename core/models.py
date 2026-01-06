@@ -2,12 +2,72 @@
 Modèles du core de l'application
 """
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import RegexValidator
 from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+class UserManager(BaseUserManager):
+    """
+    Manager personnalisé pour le modèle User.
+    Gère la création d'utilisateurs avec phone_number obligatoire.
+    """
+    
+    def _create_user(self, username, email, phone_number, password, **extra_fields):
+        """
+        Crée et sauvegarde un utilisateur avec les informations données.
+        """
+        if not username:
+            raise ValueError('Le nom d\'utilisateur est obligatoire')
+        if not email:
+            raise ValueError('L\'email est obligatoire')
+        if not phone_number:
+            raise ValueError('Le numéro de téléphone est obligatoire')
+        
+        email = self.normalize_email(email)
+        user = self.model(
+            username=username,
+            email=email,
+            phone_number=phone_number,
+            **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_user(self, username, email, phone_number, password=None, **extra_fields):
+        """
+        Crée un utilisateur normal.
+        """
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault('is_active', False)  # Nécessite activation OTP
+        return self._create_user(username, email, phone_number, password, **extra_fields)
+    
+    def create_superuser(self, username, email, password=None, **extra_fields):
+        """
+        Crée un superutilisateur.
+        Pour les superusers, phone_number est optionnel (valeur par défaut).
+        """
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)  # Superusers sont actifs par défaut
+        
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Les superusers doivent avoir is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Les superusers doivent avoir is_superuser=True.')
+        
+        # Pour les superusers, si phone_number n'est pas fourni, utiliser un numéro basé sur l'username
+        phone_number = extra_fields.pop('phone_number', None)
+        if not phone_number:
+            # Générer un numéro unique basé sur l'username
+            phone_number = f"+228{hash(username) % 100000000:08d}"
+        
+        return self._create_user(username, email, phone_number, password, **extra_fields)
 
 
 class User(AbstractUser):
@@ -36,6 +96,12 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Date de création")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Date de modification")
     
+    # Utiliser le manager personnalisé
+    objects = UserManager()
+    
+    # Champs requis pour la création d'utilisateur
+    REQUIRED_FIELDS = ['email', 'phone_number']
+    
     class Meta:
         verbose_name = "Utilisateur"
         verbose_name_plural = "Utilisateurs"
@@ -47,6 +113,11 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         """Override save pour logger la création d'utilisateur"""
         is_new = self.pk is None
+        
+        # Activer automatiquement les superusers
+        if self.is_superuser and not self.is_active:
+            self.is_active = True
+        
         super().save(*args, **kwargs)
         if is_new:
             logger.info(f"Nouvel utilisateur créé: {self.username} - {self.phone_number}")

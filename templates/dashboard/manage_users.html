@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestion des utilisateurs - Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Gestion des utilisateurs</h1>
+                <p class="text-gray-600 mt-2">Suspendre ou réactiver des comptes utilisateurs</p>
+            </div>
+            <a href="{% url 'dashboard:admin_dashboard' %}" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition duration-200">
+                Retour
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex space-x-4">
+            <a href="{% url 'dashboard:manage_users' %}" 
+               class="px-4 py-2 rounded-lg {% if not status_filter %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Tous
+            </a>
+            <a href="?status=active" 
+               class="px-4 py-2 rounded-lg {% if status_filter == 'active' %}bg-green-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Actifs
+            </a>
+            <a href="?status=suspended" 
+               class="px-4 py-2 rounded-lg {% if status_filter == 'suspended' %}bg-red-600 text-white{% else %}bg-gray-200 text-gray-700 hover:bg-gray-300{% endif %}">
+                Suspendus
+            </a>
+        </div>
+    </div>
+
+    <!-- Liste des utilisateurs -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        {% if users %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Utilisateur</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Téléphone</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Solde</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for user in users %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                    {{ user.username.0|upper }}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-semibold text-gray-800">{{ user.username }}</p>
+                                    <p class="text-xs text-gray-500">Inscrit le {{ user.date_joined|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ user.email }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ user.phone_number }}</td>
+                        <td class="px-6 py-4">
+                            {% if user.virtual_account %}
+                            <span class="font-semibold text-gray-800">{{ user.virtual_account.balance }} FCFA</span>
+                            {% else %}
+                            <span class="text-gray-400">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if user.virtual_account %}
+                                {% if user.virtual_account.is_suspended %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Suspendu
+                                </span>
+                                {% else %}
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Actif
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex space-x-2">
+                                <a href="{% url 'dashboard:user_detail' user.id %}" 
+                                   class="text-blue-600 hover:text-blue-800 text-sm font-semibold">
+                                    Détails
+                                </a>
+                                {% if user.virtual_account %}
+                                    {% if user.virtual_account.is_suspended %}
+                                    <form method="post" action="{% url 'dashboard:reactivate_user' user.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-green-600 hover:text-green-800 text-sm font-semibold"
+                                                onclick="return confirm('Réactiver ce compte ?')">
+                                            Réactiver
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form method="post" action="{% url 'dashboard:suspend_user' user.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-semibold"
+                                                onclick="return confirm('Suspendre ce compte ?')">
+                                            Suspendre
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-12">
+            <p class="text-gray-500 text-lg">Aucun utilisateur trouvé</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -107,3 +107,5 @@ class LoginForm(AuthenticationForm):
             'placeholder': 'Mot de passe'
         })
     )
+
+    
